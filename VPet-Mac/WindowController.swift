@@ -9,6 +9,8 @@ import Cocoa
 
 class WindowController: NSWindowController,NSWindowDelegate {
     var VPET:VPet!
+    var stateManager: VPetStateManager!
+    private var stateDisplay: VPetStateDisplay!
    
     override func windowDidLoad() {
         print("windowdidload")
@@ -40,6 +42,25 @@ class WindowController: NSWindowController,NSWindowDelegate {
         player.VPET = VPET
         
         viewcontroller.chooseActionMenu.sendVPET(VPET)
+        
+        // 初始化状态管理器
+        stateManager = VPetStateManager()
+        
+        // 初始化状态显示组件
+        stateDisplay = VPetStateDisplay(frame: viewcontroller.view.bounds)
+        stateDisplay.translatesAutoresizingMaskIntoConstraints = false
+        viewcontroller.view.addSubview(stateDisplay)
+        
+        // 设置状态显示组件的约束
+        NSLayoutConstraint.activate([
+            stateDisplay.topAnchor.constraint(equalTo: viewcontroller.view.topAnchor),
+            stateDisplay.leadingAnchor.constraint(equalTo: viewcontroller.view.leadingAnchor),
+            stateDisplay.trailingAnchor.constraint(equalTo: viewcontroller.view.trailingAnchor),
+            stateDisplay.bottomAnchor.constraint(equalTo: viewcontroller.view.bottomAnchor)
+        ])
+        
+        // 启动状态管理器
+        stateManager.transition(to: .normal)
         
 //        let windowController = self.view.window?.windowController as! WindowController
 //        let dragGesture = NSPanGestureRecognizer(target: viewcontroller, action: #selector(VPET.raised2(_:)))

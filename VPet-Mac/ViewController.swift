@@ -23,6 +23,39 @@ class ViewController: NSViewController {
     @IBOutlet weak var workingOverlayTitle: NSTextField!
     @IBOutlet weak var workingOverlayStop: NSButton!
     
+    // 状态显示面板
+    private lazy var statePanel: NSView = {
+        let view = NSView()
+        view.wantsLayer = true
+        view.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.7).cgColor
+        view.layer?.cornerRadius = 10
+        return view
+    }()
+    
+    private lazy var stateLabel: NSTextField = {
+        let label = NSTextField(labelWithString: "")
+        label.font = NSFont.systemFont(ofSize: 14, weight: .medium)
+        label.textColor = .white
+        label.isBezeled = false
+        label.drawsBackground = false
+        label.isEditable = false
+        label.isSelectable = false
+        label.alignment = .center
+        return label
+    }()
+    
+    private lazy var stateDurationLabel: NSTextField = {
+        let label = NSTextField(labelWithString: "")
+        label.font = NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .regular)
+        label.textColor = .white
+        label.isBezeled = false
+        label.drawsBackground = false
+        label.isEditable = false
+        label.isSelectable = false
+        label.alignment = .center
+        return label
+    }()
+    
     // 计时器数字UI
     var timerLabel: NSTextField = {
         let label = NSTextField(labelWithString: "00:00:00")
@@ -37,9 +70,17 @@ class ViewController: NSViewController {
         return label
     }()
     
+    @IBOutlet weak var panelView: VPetStateDisplay!
+    
     override func viewDidLoad() {
         print("viewdidload")
         super.viewDidLoad()
+        // ✅ 启动时隐藏状态面板
+            panelView.isHidden = true
+
+        
+        // 添加状态显示面板
+        setupStatePanel()
         
         // 将计时器UI添加到工作浮层并稍微向下偏移
         timerLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -154,13 +195,25 @@ class ViewController: NSViewController {
         }
         switch sender.title{
         case "面板":
-            switch VPET.VPetStatus{
-            case .Ill: VPET.VPetStatus = .Happy;break;
-            case .Happy:VPET.VPetStatus = .Normal;break;
-            case .Normal:VPET.VPetStatus = .PoorCondition;break;
-            case .PoorCondition:VPET.VPetStatus = .Ill;break;
+            // 切换面板显示/隐藏
+            panelView.isHidden.toggle()
+            if !panelView.isHidden {
+                // 构造面板数据
+                let info = VPetPanelInfo(
+                    level: 1,
+                    statusText: "已关闭数据计算, 可放心挂机",
+                    money: 100.0,
+                    exp: -388.65, expMax: 100,
+                    stamina: 50.84, staminaMax: 104,
+                    mood: 62.61, moodMax: 102,
+                    satiety: 99.90, satietyMax: 104,
+                    thirst: 99.90, thirstMax: 104,
+                    state: windowController.stateManager?.currentStateType?.rawValue ?? "Normal",
+                    stateDuration: 0 // 可根据实际状态管理器获取
+                )
+                panelView.updatePanel(info: info)
             }
-            VPET.updateAnimation();break;
+            break;
         case "退出":
             VPET.shutdown();break;
         case "退出当前互动":break;
@@ -181,6 +234,52 @@ class ViewController: NSViewController {
 
     override func mouseMoved(with event: NSEvent) {
         // 移除鼠标移动事件处理，因为我们不再需要它
+    }
+
+    private func setupStatePanel() {
+        // 添加状态面板
+        statePanel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(statePanel)
+        
+        // 添加状态标签
+        stateLabel.translatesAutoresizingMaskIntoConstraints = false
+        statePanel.addSubview(stateLabel)
+        
+        // 添加持续时间标签
+        stateDurationLabel.translatesAutoresizingMaskIntoConstraints = false
+        statePanel.addSubview(stateDurationLabel)
+        
+        // 设置约束
+        NSLayoutConstraint.activate([
+            // 状态面板约束
+            statePanel.topAnchor.constraint(equalTo: view.topAnchor, constant: 10),
+            statePanel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
+            statePanel.widthAnchor.constraint(equalToConstant: 120),
+            statePanel.heightAnchor.constraint(equalToConstant: 60),
+            
+            // 状态标签约束
+            stateLabel.topAnchor.constraint(equalTo: statePanel.topAnchor, constant: 8),
+            stateLabel.leadingAnchor.constraint(equalTo: statePanel.leadingAnchor, constant: 8),
+            stateLabel.trailingAnchor.constraint(equalTo: statePanel.trailingAnchor, constant: -8),
+            
+            // 持续时间标签约束
+            stateDurationLabel.topAnchor.constraint(equalTo: stateLabel.bottomAnchor, constant: 4),
+            stateDurationLabel.leadingAnchor.constraint(equalTo: statePanel.leadingAnchor, constant: 8),
+            stateDurationLabel.trailingAnchor.constraint(equalTo: statePanel.trailingAnchor, constant: -8),
+            stateDurationLabel.bottomAnchor.constraint(equalTo: statePanel.bottomAnchor, constant: -8)
+        ])
+        
+        // 初始隐藏状态面板
+        statePanel.isHidden = true
+    }
+    
+    // 更新状态显示
+    func updateStateDisplay(state: String, duration: TimeInterval) {
+        stateLabel.stringValue = state
+        let minutes = Int(duration) / 60
+        let seconds = Int(duration) % 60
+        stateDurationLabel.stringValue = String(format: "%02d:%02d", minutes, seconds)
+        statePanel.isHidden = false
     }
 
 }
