@@ -132,7 +132,7 @@
                                 </connections>
                             </button>
                             <customView hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="OzP-D2-TBX" customClass="VPetStateDisplay" customModule="VPet_Mac">
-                                <rect key="frame" x="0.0" y="0.0" width="300" height="164"/>
+                                <rect key="frame" x="0.0" y="0.0" width="300" height="168"/>
                                 <autoresizingMask key="autoresizingMask"/>
                             </customView>
                         </subviews>
