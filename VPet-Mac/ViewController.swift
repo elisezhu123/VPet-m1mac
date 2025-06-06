@@ -136,7 +136,7 @@ class ViewController: NSViewController {
             timerLabel.centerXAnchor.constraint(equalTo: workingOverlayView.centerXAnchor),
             timerLabel.centerYAnchor.constraint(equalTo: workingOverlayView.centerYAnchor, constant: 4),
             timerLabel.widthAnchor.constraint(equalToConstant: 100),
-            timerLabel.heightAnchor.constraint(equalToConstant: 100)
+            timerLabel.heightAnchor.constraint(equalToConstant: 50)
         ])
         
         initButton()
